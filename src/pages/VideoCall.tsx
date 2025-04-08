@@ -1,23 +1,26 @@
 
 import React, { useState, useRef, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Video, Phone, MicOff, VideoOff, Mic, Settings, X, Share2, Copy, Check } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Video, Phone, MicOff, VideoOff, Mic, Settings, X, Share2, Copy, Check, ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import VideoAvatar from "./VideoAvatar";
+import VideoAvatar from "@/components/VideoAvatar";
 
-const VideoCallDemo = () => {
+const VideoCall = () => {
+  const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
   const [isCallActive, setIsCallActive] = useState(false);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [cameraActive, setCameraActive] = useState(false);
-  const [roomLink, setRoomLink] = useState("");
   const [copied, setCopied] = useState(false);
+  const [callHistory, setCallHistory] = useState<string[]>([]);
   const [messages, setMessages] = useState<string[]>([]);
   const [messageIndex, setMessageIndex] = useState(0);
+  const [contactName, setContactName] = useState("John");
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -27,17 +30,28 @@ const VideoCallDemo = () => {
     "Hi there! How can I help you today?",
     "I understand. Could you tell me more about your needs?",
     "That's interesting. Let me check what options we have.",
-    "I think we can definitely assist with that."
+    "I think we can definitely assist with that.",
+    "Let me know if you have any other questions.",
+    "Is there anything else you'd like to discuss?"
   ];
 
   useEffect(() => {
+    // If there's a room ID, try to join the call automatically
+    if (roomId) {
+      startCall();
+      
+      // Add to call history from localStorage if available
+      const history = JSON.parse(localStorage.getItem('callHistory') || '[]');
+      setCallHistory(history);
+    }
+    
     // Clean up camera stream when component unmounts
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
     if (isCallActive) {
@@ -49,7 +63,7 @@ const VideoCallDemo = () => {
         } else {
           clearInterval(interval);
         }
-      }, 5000);
+      }, 7000);
 
       return () => clearInterval(interval);
     }
@@ -87,18 +101,21 @@ const VideoCallDemo = () => {
   };
 
   const startCall = () => {
-    // Generate a random room ID
-    const roomId = Math.random().toString(36).substring(2, 10);
-    const link = `${window.location.origin}/video-call/${roomId}`;
-    setRoomLink(link);
-    
     // Start camera and set call active
     startCamera();
     setIsCallActive(true);
     
+    // Save this person to call history
+    const newHistory = [...callHistory];
+    if (!newHistory.includes(contactName)) {
+      newHistory.push(contactName);
+      setCallHistory(newHistory);
+      localStorage.setItem('callHistory', JSON.stringify(newHistory));
+    }
+    
     toast({
-      title: "Call Started",
-      description: "You can share the link with others to join this call.",
+      title: "Call Connected",
+      description: `You are now in a call with ${contactName}`,
     });
   };
 
@@ -109,7 +126,7 @@ const VideoCallDemo = () => {
     setMessages([]);
     setMessageIndex(0);
     stopCamera();
-    setRoomLink("");
+    navigate('/');
   };
 
   const toggleMic = () => {
@@ -144,7 +161,8 @@ const VideoCallDemo = () => {
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(roomLink);
+    const link = `${window.location.origin}/video-call/${roomId}`;
+    navigator.clipboard.writeText(link);
     setCopied(true);
     toast({
       title: "Link Copied!",
@@ -153,63 +171,38 @@ const VideoCallDemo = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const goToFullCall = () => {
-    if (roomLink) {
-      const roomId = roomLink.split('/').pop();
-      navigate(`/video-call/${roomId}`);
-    }
-  };
-
   return (
-    <section id="video-call" className="py-20 px-4 md:px-8 bg-background">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Video Call with Sign Language Translation</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Experience seamless video calls where sign language is automatically translated into speech and vice versa in real-time.
-          </p>
+    <div className="min-h-screen bg-background pt-20 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              className="mr-2"
+              onClick={() => navigate('/')}
+            >
+              <ArrowLeft size={18} className="mr-2" />
+              Back
+            </Button>
+            <h1 className="text-2xl font-bold">Video Call</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={copyLink}
+              className="flex gap-1 items-center"
+            >
+              {copied ? <Check size={14} /> : <Copy size={14} />}
+              {copied ? "Copied" : "Share Link"}
+            </Button>
+          </div>
         </div>
-        
+
         <div className="glass-card p-4 md:p-6 overflow-hidden">
-          {isCallActive && roomLink && (
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg bg-muted">
-              <div className="flex items-center">
-                <span className="text-sm text-muted-foreground mr-2">Shareable link:</span>
-                <span className="text-sm font-medium truncate max-w-[250px] md:max-w-md">{roomLink}</span>
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={copyLink}
-                  className="flex gap-1 items-center"
-                >
-                  {copied ? <Check size={14} /> : <Copy size={14} />}
-                  {copied ? "Copied" : "Copy"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={goToFullCall}
-                  className="flex gap-1 items-center"
-                >
-                  <Share2 size={14} />
-                  Open Full Call
-                </Button>
-              </div>
-            </div>
-          )}
-          
-          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             <div className="relative aspect-video bg-card rounded-xl overflow-hidden">
-              {!isCallActive && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-7xl mb-4">👩‍💻</div>
-                  <p className="text-muted-foreground">Start call to connect</p>
-                </div>
-              )}
-              
-              {isCallActive && (
+              {isCallActive ? (
                 <>
                   {isVideoOn ? (
                     <video 
@@ -217,11 +210,11 @@ const VideoCallDemo = () => {
                       autoPlay 
                       playsInline 
                       muted 
-                      className="w-full h-full object-cover bg-muted" 
+                      className="w-full h-full object-cover" 
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                      <VideoOff size={48} className="text-muted-foreground" />
+                      <VideoOff size={64} className="text-muted-foreground" />
                     </div>
                   )}
                   <div className="absolute top-3 left-3 glass-card bg-black/60 px-3 py-1 text-sm text-white rounded-full">
@@ -233,27 +226,29 @@ const VideoCallDemo = () => {
                     </div>
                   )}
                 </>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-7xl mb-4">👩‍💻</div>
+                  <p className="text-muted-foreground">Camera preview will appear here</p>
+                  <Button onClick={startCall} className="mt-4 btn-primary">
+                    <Phone size={18} className="mr-2" />
+                    <span>Join Call</span>
+                  </Button>
+                </div>
               )}
             </div>
             
             <div className="relative aspect-video bg-card rounded-xl overflow-hidden">
-              {!isCallActive && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-7xl mb-4">👨‍💼</div>
-                  <p className="text-muted-foreground">Waiting for call...</p>
-                </div>
-              )}
-              
-              {isCallActive && (
+              {isCallActive ? (
                 <>
-                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <div className="absolute inset-0 flex items-center justify-center p-6">
                     <VideoAvatar 
                       text={messages.length > 0 ? messages[messages.length - 1] : ""} 
                       isProcessing={false}
                     />
                   </div>
                   <div className="absolute top-3 left-3 glass-card bg-black/60 px-3 py-1 text-sm text-white rounded-full">
-                    John (Voice)
+                    {contactName} (Voice)
                   </div>
                   {messages.length > 0 && (
                     <div className="absolute bottom-3 left-3 glass-card bg-sign-blue/80 px-3 py-1 text-sm text-white rounded-lg max-w-[80%]">
@@ -261,17 +256,17 @@ const VideoCallDemo = () => {
                     </div>
                   )}
                 </>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-7xl mb-4">👨‍💼</div>
+                  <p className="text-muted-foreground">Waiting for call to connect...</p>
+                </div>
               )}
             </div>
           </div>
           
           <div className="mt-6 flex justify-center">
-            {!isCallActive ? (
-              <Button onClick={startCall} className="btn-primary">
-                <Phone size={18} className="mr-2" />
-                <span>Start Demo Call</span>
-              </Button>
-            ) : (
+            {isCallActive && (
               <div className="flex gap-4">
                 <Button 
                   variant="outline" 
@@ -296,7 +291,6 @@ const VideoCallDemo = () => {
                 <Button 
                   variant="outline" 
                   className="rounded-full w-12 h-12 p-0 bg-muted/50"
-                  onClick={goToFullCall}
                 >
                   <Settings size={18} />
                 </Button>
@@ -304,9 +298,23 @@ const VideoCallDemo = () => {
             )}
           </div>
         </div>
+
+        {isCallActive && callHistory.length > 0 && (
+          <Card className="mt-8 p-6">
+            <h2 className="text-lg font-medium mb-4">Call History</h2>
+            <ul className="space-y-2">
+              {callHistory.map((name, i) => (
+                <li key={i} className="flex items-center justify-between p-2 rounded hover:bg-muted">
+                  <span>{name}</span>
+                  <span className="text-sm text-muted-foreground">Recent call</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
       </div>
-    </section>
+    </div>
   );
 };
 
-export default VideoCallDemo;
+export default VideoCall;

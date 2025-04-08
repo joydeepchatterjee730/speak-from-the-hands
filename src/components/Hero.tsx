@@ -2,34 +2,43 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  
   return (
-    <section className="pt-32 pb-24 px-4 md:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
+    <section className="pt-32 pb-24 px-4 md:px-8 bg-background">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
             Breaking Barriers in
             <span className="gradient-text block">Sign Language Communication</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 max-w-lg">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-lg">
             Our AI-powered platform translates sign language to speech and speech to sign language in real-time, making communication accessible for everyone.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button className="btn-primary">
+            <Button 
+              className="btn-primary"
+              onClick={() => navigate("/dashboard")}
+            >
               <span>Start Communicating</span>
               <ArrowRight size={18} className="ml-2" />
             </Button>
-            <Button className="btn-secondary">
+            <Button 
+              className="btn-secondary"
+              onClick={() => navigate("/how-it-works")}
+            >
               How It Works
             </Button>
           </div>
           <div className="pt-6">
-            <p className="text-sm text-gray-500">Powered by state-of-the-art AI models for seamless translation</p>
+            <p className="text-sm text-muted-foreground">Powered by state-of-the-art AI models for seamless translation</p>
           </div>
         </div>
         <div className="relative">
-          <div className="w-full h-full absolute -z-10 rounded-full bg-gradient-radial from-purple-200/50 to-transparent opacity-70 blur-3xl"></div>
+          <div className="w-full h-full absolute -z-10 rounded-full bg-gradient-radial from-purple-500/20 to-transparent opacity-70 blur-3xl"></div>
           <div className="glass-card p-4 animate-float">
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-r from-sign-blue/10 to-sign-purple/10">
               <div className="absolute inset-0 flex items-center justify-center">
@@ -37,7 +46,7 @@ const Hero = () => {
                 <div className="absolute text-7xl md:text-8xl">🤟</div>
               </div>
               <div className="absolute bottom-4 left-4 right-4 glass-card p-3 text-center">
-                <p className="font-medium text-gray-800">Sign Language → Speech</p>
+                <p className="font-medium text-foreground">Sign Language → Speech</p>
               </div>
             </div>
           </div>
@@ -48,7 +57,7 @@ const Hero = () => {
                 <div className="absolute text-4xl md:text-5xl">🔊</div>
               </div>
               <div className="absolute bottom-2 left-2 right-2 glass-card p-2 text-center">
-                <p className="font-medium text-xs md:text-sm text-gray-800">Speech → Sign</p>
+                <p className="font-medium text-xs md:text-sm text-foreground">Speech → Sign</p>
               </div>
             </div>
           </div>

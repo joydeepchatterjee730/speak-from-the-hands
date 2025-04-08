@@ -14,20 +14,24 @@ import {
   Languages, 
   UserPlus 
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       <main>
         <Hero />
         
         {/* Features Section */}
-        <section className="py-20 px-4 md:px-8">
+        <section className="py-20 px-4 md:px-8 bg-background">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Breaking Communication Barriers</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Our platform offers multiple ways to facilitate communication between deaf and hearing individuals.
               </p>
             </div>
@@ -79,12 +83,18 @@ const Index = () => {
               Join us in creating a more accessible world where everyone can communicate freely.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-sign-blue font-medium py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Button 
+                className="bg-white text-sign-blue font-medium py-7 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                onClick={() => navigate('/dashboard')}
+              >
                 Get Started
-              </button>
-              <button className="bg-transparent border border-white text-white font-medium py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              </Button>
+              <Button 
+                className="bg-transparent border border-white text-white font-medium py-7 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                onClick={() => navigate('/how-it-works')}
+              >
                 Learn More
-              </button>
+              </Button>
             </div>
           </div>
         </section>
