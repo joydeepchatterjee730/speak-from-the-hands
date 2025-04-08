@@ -3,8 +3,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Camera, Play, RefreshCw, Volume2, StopCircle } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const SignToTextDemo = () => {
+  const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const [hasResult, setHasResult] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,10 +34,18 @@ const SignToTextDemo = () => {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         setCameraActive(true);
+        toast({
+          title: "Camera activated",
+          description: "Your camera is now active and ready to use.",
+        });
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
-      alert("Could not access your camera. Please check permissions.");
+      toast({
+        title: "Camera Error",
+        description: "Could not access your camera. Please check permissions.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -61,6 +71,10 @@ const SignToTextDemo = () => {
       setLoading(false);
       setHasResult(true);
       setTranslatedText("Hello, how are you today?");
+      toast({
+        title: "Translation Complete",
+        description: "Sign language has been translated to text.",
+      });
     }, 3000);
   };
 
@@ -86,11 +100,15 @@ const SignToTextDemo = () => {
     if ('speechSynthesis' in window && translatedText) {
       const utterance = new SpeechSynthesisUtterance(translatedText);
       window.speechSynthesis.speak(utterance);
+      toast({
+        title: "Speaking",
+        description: "Text is being spoken aloud.",
+      });
     }
   };
 
   return (
-    <section id="sign-to-text" className="py-20 px-4 md:px-8 bg-background">
+    <section id="sign-to-text" className="py-20 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Sign Language to Text & Speech</h2>

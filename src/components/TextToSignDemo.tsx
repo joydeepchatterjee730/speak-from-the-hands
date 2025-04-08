@@ -5,8 +5,10 @@ import { Card } from "@/components/ui/card";
 import { Send, Mic, RefreshCw } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import VideoAvatar from "./VideoAvatar";
+import { useToast } from "@/components/ui/use-toast";
 
 const TextToSignDemo = () => {
+  const { toast } = useToast();
   const [inputText, setInputText] = useState("");
   const [displayText, setDisplayText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -21,12 +23,20 @@ const TextToSignDemo = () => {
     setTimeout(() => {
       setIsProcessing(false);
       setDisplayText(inputText);
+      toast({
+        title: "Text Translated",
+        description: "Your text has been converted to sign language.",
+      });
     }, 1500);
   };
 
   const handleVoiceInput = () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Your browser doesn't support microphone access");
+      toast({
+        title: "Microphone Error",
+        description: "Your browser doesn't support microphone access",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -35,6 +45,11 @@ const TextToSignDemo = () => {
     // Request microphone access
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(() => {
+        toast({
+          title: "Listening...",
+          description: "Speak clearly into your microphone.",
+        });
+        
         // Simulate speech recognition
         setTimeout(() => {
           const demoTexts = [
@@ -47,12 +62,21 @@ const TextToSignDemo = () => {
           setInputText(randomText);
           setDisplayText(randomText);
           setIsProcessing(false);
+          
+          toast({
+            title: "Speech Recognized",
+            description: "Your speech has been converted to sign language.",
+          });
         }, 2000);
       })
       .catch(err => {
         console.error("Error accessing microphone:", err);
         setIsProcessing(false);
-        alert("Could not access your microphone. Please check permissions.");
+        toast({
+          title: "Microphone Error",
+          description: "Could not access your microphone. Please check permissions.",
+          variant: "destructive"
+        });
       });
   };
 
@@ -63,7 +87,7 @@ const TextToSignDemo = () => {
   };
 
   return (
-    <section id="text-to-sign" className="py-20 px-4 md:px-8 bg-background">
+    <section id="text-to-sign" className="py-20 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Text to Sign Language</h2>

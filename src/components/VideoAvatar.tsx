@@ -18,9 +18,12 @@ const signLanguageMap: Record<string, string> = {
   "no": "/signs/no.gif",
   "help": "/signs/help.gif",
   "goodbye": "/signs/goodbye.gif",
-  "hello, how are you today": "/signs/greeting.gif",
-  "hi there! how can i help you today": "/signs/greeting-help.gif",
-  "default": "/signs/avatar-idle.gif"
+  "hello, how are you today": "/signs/full-body/greeting.gif",
+  "hi there! how can i help you today": "/signs/full-body/greeting-help.gif",
+  "i understand. could you tell me more about your needs?": "/signs/full-body/understand.gif",
+  "that's interesting. let me check what options we have.": "/signs/full-body/interesting.gif",
+  "i think we can definitely assist with that.": "/signs/full-body/assist.gif",
+  "default": "/signs/full-body/avatar-idle.gif"
 };
 
 const VideoAvatar: React.FC<VideoAvatarProps> = ({ 
@@ -32,7 +35,7 @@ const VideoAvatar: React.FC<VideoAvatarProps> = ({
   
   useEffect(() => {
     if (!text || isProcessing) {
-      setAvatarSrc("/signs/avatar-idle.gif");
+      setAvatarSrc("/signs/full-body/avatar-idle.gif");
       return;
     }
 
@@ -54,14 +57,14 @@ const VideoAvatar: React.FC<VideoAvatarProps> = ({
           <p className="text-muted-foreground">Processing sign language...</p>
         </div>
       ) : (
-        <div className="relative aspect-square max-h-[400px] w-full flex items-center justify-center">
+        <div className="relative aspect-video max-h-[400px] w-full flex items-center justify-center">
           {avatarSrc ? (
             <div className="w-full h-full rounded-xl overflow-hidden bg-gradient-to-r from-background/50 to-muted/50">
               <img 
                 src={avatarSrc} 
                 alt={`Sign language avatar ${text ? `signing: ${text}` : ''}`}
-                className="w-full h-full object-contain"
-                onError={() => setAvatarSrc("/signs/avatar-idle.gif")}
+                className="full-body-avatar"
+                onError={() => setAvatarSrc("/signs/full-body/avatar-idle.gif")}
               />
             </div>
           ) : (
